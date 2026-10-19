@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>FAIR Case Record Demonstrator</title>
+<meta name="description" content="Demonstrator of a FAIR case record for a fixed-bed experiment and its particle-resolved CFD: HDF5 viewer and HTML viewer.">
+<style>
+:root { --blue: #003399; --green: #009682; --red: #C40D20; --amber: #b26a00; --ink: #1d1d1f; --muted: #5f6368; --bg: #f5f5f3; --card: #ffffff; --line: #e2e2de; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --blue: #7d9cff; --green: #3cc4ae; --red: #ff6b78; --amber: #f0b44c; --ink: #ececec; --muted: #a8a8a8; --bg: #16171a; --card: #202125; --line: #34353a; } }
+:root[data-theme="dark"] { --blue: #7d9cff; --green: #3cc4ae; --red: #ff6b78; --amber: #f0b44c; --ink: #ececec; --muted: #a8a8a8; --bg: #16171a; --card: #202125; --line: #34353a; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 Arial, Helvetica, sans-serif; }
+main { max-width: 720px; margin: 0 auto; padding: 32px 16px 48px; }
+.kicker { color: var(--blue); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; font-size: 13px; margin: 0 0 6px; }
+h1 { font-size: 28px; line-height: 1.2; margin: 0 0 10px; }
+.lead { color: var(--muted); margin: 0 0 22px; }
+.demo { background: var(--card); border: 1px solid var(--line); border-left: 6px solid var(--amber); border-radius: 10px; padding: 16px 20px; margin: 0 0 26px; }
+.demo b.t { display: block; font-size: 17px; margin-bottom: 8px; }
+.ab { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0 10px; }
+.ab div { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+.ab div b { display: block; } .ab div span { color: var(--muted); font-size: 14px; }
+.ab .a { border-top: 4px solid var(--green); } .ab .b { border-top: 4px solid var(--red); }
+@media (max-width: 520px) { .ab { grid-template-columns: 1fr; } }
+.demo p { margin: 8px 0 0; }
+.btn { display: block; text-decoration: none; color: inherit; background: var(--card); border: 1px solid var(--line); border-left: 6px solid var(--blue); border-radius: 10px; padding: 18px 20px; margin: 0 0 14px; }
+.btn:hover, .btn:focus-visible { border-color: var(--blue); outline: none; }
+.btn.h5 { border-left-color: var(--red); }
+.btn b { display: block; font-size: 19px; margin-bottom: 4px; }
+.btn span { color: var(--muted); font-size: 14px; }
+.chain { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 24px 0 8px; font-size: 13px; }
+.chain i { font-style: normal; padding: 4px 10px; border-radius: 99px; background: var(--card); border: 1px solid var(--line); }
+.chain i.e { border-color: var(--green); } .chain i.s { border-color: var(--red); } .chain i.u { border-color: var(--blue); }
+h2 { font-size: 17px; margin: 30px 0 8px; }
+.lic { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 20px; }
+.lic p { margin: 6px 0; }
+a { color: var(--blue); }
+footer { margin-top: 36px; font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <p class="kicker">FAIR case record · TU Berlin · demonstrator</p>
+  <h1>One fixed-bed case, from experiment to CFD, in one HDF5 file</h1>
+  <p class="lead">This page demonstrates the FAIR workflow: an experiment and the automated pipeline that rebuilds it
+    (packed bed, mesh, particle-resolved CFD) are stored in a single, self-describing HDF5 case record with units,
+    provenance and checksums, and shown in a browser viewer.</p>
+
+  <div class="demo" role="note">
+    <b class="t">This is a demonstrator: measurement and simulation do not belong together</b>
+    <div class="ab">
+      <div class="a"><b>Measurement: particle A</b><span>a real fixed-bed experiment on the TREx rig (flows, pressures, temperatures)</span></div>
+      <div class="b"><b>Simulation: particle B</b><span>bed, mesh and CFD computed for a different particle, a generic hollow cylinder</span></div>
+    </div>
+    <p>The two were combined on purpose to show the workflow and the interface. The values are not physically
+      consistent and must not be used for validation. Feedback on <b>how the record and viewers are organised and how
+      understandable they are</b> is very welcome, not on the numbers.</p>
+  </div>
+
+  <a class="btn h5" id="h5-btn" href="https://myhdf5.hdfgroup.org/">
+    <b>Explore the HDF5 file in myHDF5 &rarr;</b>
+    <span>Browse every group, attribute and dataset of the case record in the free online viewer (H5Web, ESRF; hosted by the HDF Group). ~79 MB, opens in the browser.</span>
+  </a>
+  <a class="btn" href="report.html">
+    <b>Open the HTML viewer &rarr;</b>
+    <span>Interactive report built from the same file: rig, operating points, packed bed in 3D, mesh, CFD results, experiment vs CFD, provenance. ~9 MB, best on a laptop.</span>
+  </a>
+
+  <div class="chain" aria-label="Data flow">
+    <i class="e">Experiment</i>&rarr;<i class="e">Experiment HDF5</i>&rarr;<i class="s">Automated pipeline</i>&rarr;<i class="s">Case record HDF5</i>&rarr;<i class="u">HDF5 / HTML viewer</i>&rarr;<i class="u">You</i>
+  </div>
+
+  <h2>Licence of the data</h2>
+  <div class="lic">
+    <p><b>All rights reserved.</b> © 2026 Technische Universität Berlin. The data are shown here only to demonstrate
+      the workflow. They are <b>not released for use</b>: no permission is granted to use, copy, redistribute or
+      process them, including for training of machine-learning models.</p>
+    <p>The data will be published under an open licence in a separate data repository.</p>
+  </div>
+
+  <footer>
+    Alexander Nicolai · Technische Universität Berlin · <a href="mailto:alexander.nicolai@tu-berlin.de">alexander.nicolai@tu-berlin.de</a><br>
+    Funded by the Deutsche Forschungsgemeinschaft (DFG), project 556175587.
+  </footer>
+</main>
+<script>
+// myHDF5 opens the file by URL; built from this page's own address so the repo name is not hard-coded
+document.getElementById("h5-btn").href = "https://myhdf5.hdfgroup.org/view?url=" +
+  encodeURIComponent(new URL("data/TREX_DEMO_2026-10-06_001.h5", location.href).href);
+</script>
+</body>
+</html>
