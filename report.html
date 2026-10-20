@@ -59,7 +59,7 @@ h3 { font-size: 13px; margin: 0 0 6px; font-weight: 600; color: var(--text-secon
 .grid > * { min-width: 0; }
 .tiles { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-bottom: 14px; }
 .tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
-.tile .k { font-size: 12px; color: var(--text-secondary); } .tile .v { font-size: 20px; font-weight: 600; margin-top: 2px; }
+.tile .k { font-size: 12px; color: var(--text-secondary); } .tile .v { font-size: 20px; font-weight: 600; margin-top: 2px; overflow-wrap: anywhere; }
 .tile .s { font-size: 12px; color: var(--text-muted); }
 .status { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-secondary); }
 .status::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--c); }
@@ -413,7 +413,9 @@ function select(key) {
 function drawRig(host, spec) {
   host.innerHTML = "";
   if (spec.title) host.append(el("div", { class: "ctitle" }, spec.title, info(spec.info)));
-  const D = spec.drawing, W = Math.max(300, host.clientWidth || 700), m = { l: 58, r: 62 }, PW = W - m.l - m.r;
+  const D = spec.drawing, W = Math.max(280, host.clientWidth || 700), narrow = W < 520;
+  // phone: narrower margins, sensor IDs instead of labels (full text in the sensor list below), smaller dots
+  const m = narrow ? { l: 44, r: 52 } : { l: 58, r: 62 }, PW = W - m.l - m.r, dotR = narrow ? 2.2 : 3;
   const SB = D.sensors ? 50 : 0, imgY = SB;                      // label bands above and below the drawing (sensors)
   const IH = PW * D.height_px / D.width_px, top = imgY + IH + SB + 40, PH = spec.height || 300, H = top + PH + 44;
   const k = D.zL_mm / (D.zL_px - D.z0_px), z0 = -D.z0_px * k, z1 = (D.width_px - D.z0_px) * k;   // z range = image width
@@ -437,21 +439,21 @@ function drawRig(host, spec) {
     const op = spec.opRow || {}, px2x = px => m.l + px / D.width_px * PW, py2y = py => imgY + py / D.height_px * IH;
     const KC = { temperature: "--s2", pressure: "--s1", flow: "--s3", position: "--s4", circuit: "--text-muted" };
     const marks = D.sensors.map(s0 => { const z = s0.z_from ? op[s0.z_from] : null, x = s0.z_from ? (z != null ? Xz(z) : null) : px2x(s0.x_px);
-      return x == null ? null : { ...s0, x, y: py2y(s0.y_px), c: css(KC[s0.kind] || "--text-secondary"),
+      return x == null ? null : { ...s0, x, y: py2y(s0.y_px), c: css(KC[s0.kind] || "--text-secondary"), short: String(s0.id || s0.label).replace(/b$/, ""),
         tip: s0.text + (s0.z_from && z != null ? ` (z = ${fmt(z, 4)} mm)` : "") }; }).filter(Boolean);
     if (spec.ti004) { const [a, b] = spec.ti004, y = py2y(D.axis_y_px || D.height_px / 2);
       svg.append(S("line", { x1: Xz(a), x2: Xz(b), y1: y, y2: y, stroke: css("--s4"), "stroke-width": 4, "stroke-linecap": "round", opacity: 0.9 }));
-      marks.push({ id: "TI-004", label: `TI-004 on the axis (sled ZIC-001), z ${fmt(a, 3)}\u2013${fmt(b, 3)} mm`, x: (Xz(a) + Xz(b)) / 2, y, side: "bottom",
+      marks.push({ id: "TI-004", short: "TI-004", label: `TI-004 on the axis (sled ZIC-001), z ${fmt(a, 3)}\u2013${fmt(b, 3)} mm`, x: (Xz(a) + Xz(b)) / 2, y, side: "bottom",
         c: css("--s4"), noDot: true, tip: "TI-004: sheathed thermocouple inside the capillary on the bed axis, moved by the linear sled ZIC-001; bar = measured range" }); }
     for (const side of ["top", "bottom"]) {
       const Ls = marks.filter(q => q.side === side).sort((p, q) => p.x - q.x), end = [-1e9, -1e9, -1e9];
       for (const mk of Ls) {
-        const w = mk.label.length * 5.9 + 8, lx = Math.min(Math.max(mk.x, w / 2 + 2), W - w / 2 - 2);
+        const txt = narrow ? mk.short : mk.label, w = txt.length * (narrow ? 5.4 : 5.9) + 8, lx = Math.min(Math.max(mk.x, w / 2 + 2), W - w / 2 - 2);
         let row = end.findIndex(e => e < lx - w / 2); if (row < 0) row = end.indexOf(Math.min(...end)); end[row] = lx + w / 2;
         const ly = side === "top" ? imgY - 6 - 14 * row : imgY + IH + 14 + 14 * row;
         svg.append(S("line", { x1: mk.x, y1: mk.y, x2: lx, y2: side === "top" ? ly + 3 : ly - 10, stroke: mk.c, "stroke-width": 1, opacity: 0.7 }));
-        if (!mk.noDot) svg.append(S("circle", { cx: mk.x, cy: mk.y, r: 3.5, fill: mk.c, stroke: css("--surface-1"), "stroke-width": 1.2 }));
-        const t = S("text", { x: lx, y: ly, "text-anchor": "middle", "font-size": 11, fill: mk.c }, mk.label);
+        if (!mk.noDot) svg.append(S("circle", { cx: mk.x, cy: mk.y, r: narrow ? 2.5 : 3.5, fill: mk.c, stroke: css("--surface-1"), "stroke-width": 1 }));
+        const t = S("text", { x: lx, y: ly, "text-anchor": "middle", "font-size": narrow ? 10 : 11, fill: mk.c }, txt);
         t.append(S("title", {}, mk.tip)); svg.append(t);
       }
     }
@@ -475,11 +477,11 @@ function drawRig(host, spec) {
     const r = sr.axis === "z" ? yT : yP; if (!r) continue;
     const X = sr.axis === "z" ? Xz : Xf, Y = Yr(r), c = css(sr.color.replace(/var\((.*)\)/, "$1"));
     const P = sr.x.map((x, i) => [x, sr.y[i], sr.err?.[i], sr.label?.[i]]).filter(p => Number.isFinite(p[0]) && Number.isFinite(p[1]));
-    if (sr.err) for (const [x, y, e] of P) if (e) svg.append(S("line", { x1: X(x), x2: X(x), y1: Y(y - e), y2: Y(y + e), stroke: c, "stroke-width": 1.2 }));
+    if (sr.err) for (const [x, y, e] of P) if (e) svg.append(S("line", { x1: X(x), x2: X(x), y1: Y(y - e), y2: Y(y + e), stroke: c, "stroke-width": 1 }));
     if (sr.kind !== "points") svg.append(S("path", { d: P.map((p, i) => `${i ? "L" : "M"}${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join(""),
       fill: "none", stroke: c, "stroke-width": sr.width || 2, "stroke-dasharray": sr.dash ? "5 4" : "", "stroke-linejoin": "round" }));
     if (sr.kind === "points" || sr.kind === "linepoints")
-      for (const [x, y] of P) svg.append(S("circle", { cx: X(x), cy: Y(y), r: 4, fill: c, stroke: css("--surface-1"), "stroke-width": 1.5 }));
+      for (const [x, y] of P) svg.append(S("circle", { cx: X(x), cy: Y(y), r: dotR, fill: c, stroke: css("--surface-1"), "stroke-width": 1 }));
     for (const [x, y, e, lab] of P) pts.push({ px: X(x), py: Y(y), c, sr, x, y, e, lab });
   }
   const hit = S("rect", { x: m.l, y: top, width: PW, height: PH, fill: "transparent" }); svg.append(hit);
@@ -494,6 +496,9 @@ function drawRig(host, spec) {
       sr.name + (sr.axis === "f" ? " (top / right axis)" : ""));
     const flip = () => { sr.hidden = !sr.hidden; drawRig(host, spec); };
     it.onclick = flip; it.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); } }; return it; })));
+  if (narrow && D.sensors) host.append(el("details", { class: "note" }, el("summary", {}, "Sensor list"),
+    el("table", { class: "kv" }, el("tbody", {}, D.sensors.filter((q, i, a) => a.findIndex(o => o.label === q.label) === i)
+      .map(q => el("tr", {}, el("td", {}, String(q.id).replace(/b$/, "")), el("td", {}, q.text || q.label)))))));
 }
 function tab00(panel) {
   if (!stageFrame("00_experimental", panel, "Import the experiment with `expimport trex <container> --case <case>`.")) return;
@@ -547,10 +552,12 @@ function tab00(panel) {
                 "T_wall_heat_end_K", "p_in_abs_Pa", "p_out_abs_Pa", "dp_bed_Pa", "u_dp_bed_Pa"].filter(c => c in d);
   panel.append(el("div", { class: "card" }, tableEl(op, cols, { sel: i => E.selected.includes(d.op_id[i]) }),
     el("div", { class: "meta", style: { fontSize: "12px", color: "var(--text-muted)", marginTop: "6px" } }, "Highlighted rows are simulated.")));
-  panel.append(el("h2", {}, "Assumptions (every value not read from the experiment file)"));
-  panel.append(el("div", { class: "card" }, el("table", {}, el("tbody", {}, E.assumptions.map(a => el("tr", {},
-    el("td", { style: { verticalAlign: "top" } }, a.id), el("td", { style: { textAlign: "left", whiteSpace: "normal" } },
-      el("strong", {}, a.topic + ": "), String(a.value), el("div", { style: { color: "var(--text-muted)" } }, a.reason || ""))))))));
+  // Assumptions section hidden for now (2026-10-20, under review); the data stay in the payload (P.s00.assumptions) and in
+  // /00_experimental_import/assumptions. Remove the comment markers to show it again.
+  // panel.append(el("h2", {}, "Assumptions (every value not read from the experiment file)"));
+  // panel.append(el("div", { class: "card" }, el("table", {}, el("tbody", {}, E.assumptions.map(a => el("tr", {},
+  //   el("td", { style: { verticalAlign: "top" } }, a.id), el("td", { style: { textAlign: "left", whiteSpace: "normal" } },
+  //     el("strong", {}, a.topic + ": "), String(a.value), el("div", { style: { color: "var(--text-muted)" } }, a.reason || ""))))))));
   panel.append(el("div", { class: "meta", style: { marginTop: "10px", fontSize: "12px", color: "var(--text-muted)" } },
     `Source: ${E.file} (sha256 ${String(E.sha256).slice(0, 16)}\u2026), copied unchanged into /00_experimental (same structure as the file; tables derived from it in /00_experimental_import).`));
 }
