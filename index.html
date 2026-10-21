@@ -15,7 +15,8 @@ body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 Arial
 main { max-width: 720px; margin: 0 auto; padding: 32px 16px 48px; }
 .kicker { color: var(--blue); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; font-size: 13px; margin: 0 0 6px; }
 h1 { font-size: 28px; line-height: 1.2; margin: 0 0 10px; }
-.lead { color: var(--muted); margin: 0 0 22px; }
+.lead { color: var(--muted); margin: 0 0 12px; }
+.lead:last-of-type { margin-bottom: 22px; }
 .demo { background: var(--card); border: 1px solid var(--line); border-left: 6px solid var(--amber); border-radius: 10px; padding: 16px 20px; margin: 0 0 26px; }
 .demo b.t { display: block; font-size: 17px; margin-bottom: 8px; }
 .ab { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0 10px; }
@@ -29,7 +30,7 @@ h1 { font-size: 28px; line-height: 1.2; margin: 0 0 10px; }
 .btn.h5 { border-left-color: var(--red); }
 .btn b { display: block; font-size: 19px; margin-bottom: 4px; }
 .btn span { color: var(--muted); font-size: 14px; }
-.chain { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 24px 0 8px; font-size: 13px; }
+.chain { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 4px 0 18px; font-size: 13px; }
 .chain i { font-style: normal; padding: 4px 10px; border-radius: 99px; background: var(--card); border: 1px solid var(--line); }
 .chain i.e { border-color: var(--green); } .chain i.s { border-color: var(--red); } .chain i.u { border-color: var(--blue); }
 h2 { font-size: 17px; margin: 30px 0 8px; }
@@ -43,9 +44,14 @@ footer { margin-top: 36px; font-size: 13px; color: var(--muted); }
 <main>
   <p class="kicker">FAIR case record · TU Berlin · demonstrator</p>
   <h1>One fixed-bed case, from experiment to CFD, in one HDF5 file</h1>
-  <p class="lead">This page demonstrates the FAIR workflow: an experiment and the automated pipeline that rebuilds it
-    (packed bed, mesh, particle-resolved CFD) are stored in a single, self-describing HDF5 case record with units,
-    provenance and checksums, and shown in a browser viewer.</p>
+  <div class="chain" aria-label="Data flow">
+    <i class="e">Experiment</i>&rarr;<i class="e">Experiment HDF5</i>&rarr;<i class="s">Automated pipeline / CFD simulation</i>&rarr;<i class="s">Added to HDF5 case record</i>&rarr;<i class="u">HDF5 / HTML viewer</i>&rarr;<i class="u">You</i>
+  </div>
+  <p class="lead">This page demonstrates the results of an automated pipeline of an experimental test combined with
+    its numerical simulations.</p>
+  <p class="lead">The results are stored in a single, self-describing HDF5 case record with units, provenance and
+    checksums, and shown in a browser viewer.</p>
+  <p class="lead">It will be moved to a repository with a filterable interface.</p>
 
   <div class="demo" role="note">
     <b class="t">This is a demonstrator: measurement and simulation do not belong together</b>
@@ -67,9 +73,6 @@ footer { margin-top: 36px; font-size: 13px; color: var(--muted); }
     <span>Interactive report built from the same file: rig, operating points, packed bed in 3D, mesh, CFD results, experiment vs CFD, provenance. ~9 MB, best on a laptop.</span>
   </a>
 
-  <div class="chain" aria-label="Data flow">
-    <i class="e">Experiment</i>&rarr;<i class="e">Experiment HDF5</i>&rarr;<i class="s">Automated pipeline</i>&rarr;<i class="s">Case record HDF5</i>&rarr;<i class="u">HDF5 / HTML viewer</i>&rarr;<i class="u">You</i>
-  </div>
 
   <h2>Licence of the data</h2>
   <div class="lic">
